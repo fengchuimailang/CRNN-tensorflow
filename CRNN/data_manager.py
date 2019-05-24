@@ -56,9 +56,9 @@ class DataManager(object):
 
         return examples, len(examples)
 
-    def __egnerate_all_train_batches(self):
+    def __generate_all_train_batches(self):
         train_batches = []
-        while not self.current_train_offset + self.batch_size > self.test_batches:
+        while not self.current_train_offset + self.batch_size > self.test_offset:
             old_offset = self.current_train_offset
 
             new_offset = self.current_train_offset + self.batch_size

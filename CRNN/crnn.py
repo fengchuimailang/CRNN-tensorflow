@@ -195,6 +195,7 @@ class CRNN(object):
             for i in range(self.step, iteration_count + self.step):
                 iter_loss = 0
                 for batch_y, batch_dt, batch_x in self.__data_manager.train_batches:
+                    # print(batch_y, "\n",batch_dt,"\n" ,batch_x)
                     op, decoded, loss_value = self.__session.run(
                         [self.__optimizer, self.__decoded, self.__cost],
                         feed_dict={
@@ -211,7 +212,7 @@ class CRNN(object):
 
                     iter_loss += loss_value
 
-                self.___saver.save(
+                self.__saver.save(
                     self.__session,
                     self.__save_path,
                     global_step=self.step

@@ -2,7 +2,8 @@ import argparse
 import os
 from crnn import CRNN
 
-os.environ["CUDA_VISIBLE_DEVICES"]="1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+
 
 def parse_arguments():
     """
@@ -36,15 +37,15 @@ def parse_arguments():
         type=str,
         nargs="?",
         help="The path where the pretrained model can be found or the model will be saved",
-	default="./save/"
+        default="./save/"
     )
     parser.add_argument(
-	"-ex",
-	"--example_path",
-	type=str,
-	nargs="?",
-	help="The path to the containing the examples (training samples)",
-	required=True
+        "-ex",
+        "--example_path",
+        type=str,
+        nargs="?",
+        help="The path to the containing the examples (training samples)",
+        required=True
     )
     parser.add_argument(
         "-bs",
@@ -60,14 +61,14 @@ def parse_arguments():
         type=int,
         nargs="?",
         help="How many iteration in training",
-        default=10
+        default=2000
     )
     parser.add_argument(
         "-miw",
         "--max_image_width",
         nargs="?",
         help="Maximum width of an example before truncating",
-        default = 100
+        default=100
     )
     parser.add_argument(
         "-r",
@@ -78,13 +79,14 @@ def parse_arguments():
 
     return parser.parse_args()
 
+
 def main():
     args = parse_arguments()
 
     if not args.train and not args.test:
         print("If we are not training,and not testing,what is the point?")
 
-    crnn =None
+    crnn = None
 
     if args.train:
         crnn = CRNN(
@@ -109,5 +111,6 @@ def main():
             )
         crnn.test()
 
-if __name__ =="__main__":
+
+if __name__ == "__main__":
     main()
