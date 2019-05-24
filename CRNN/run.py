@@ -1,6 +1,8 @@
 import argparse
+import os
 from crnn import CRNN
 
+os.environ["CUDA_VISIBLE_DEVICES"]=0
 
 def parse_arguments():
     """
