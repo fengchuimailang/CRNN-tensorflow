@@ -2,7 +2,7 @@ import argparse
 import os
 from crnn import CRNN
 
-os.environ["CUDA_VISIBLE_DEVICES"]=0
+os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
 def parse_arguments():
     """
@@ -35,12 +35,20 @@ def parse_arguments():
         "--model_path",
         type=str,
         nargs="?",
-        help="The path to the file containing the example (training samples)",
-        required=True
+        help="The path where the pretrained model can be found or the model will be saved",
+	default="./save/"
+    )
+    parser.add_argument(
+	"-ex",
+	"--example_path",
+	type=str,
+	nargs="?",
+	help="The path to the containing the examples (training samples)",
+	required=True
     )
     parser.add_argument(
         "-bs",
-        "--batches_size",
+        "--batch_size",
         type=int,
         nargs="?",
         help="Size of a batch",
@@ -59,12 +67,12 @@ def parse_arguments():
         "--max_image_width",
         nargs="?",
         help="Maximum width of an example before truncating",
-        dedault = 100
+        default = 100
     )
     parser.add_argument(
         "-r",
         "--restore",
-        action="store_ture",
+        action="store_true",
         help="Define if we try to load a checkpoint file from the save folder"
     )
 

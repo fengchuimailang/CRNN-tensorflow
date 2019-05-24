@@ -7,7 +7,7 @@ from scipy.misc import imread, imresize, imsave
 from tensorflow.contrib import rnn
 
 from data_manager import DataManager
-from utils import sparse_tuple_from, resize_imgae, label_to_array, ground_truth_to_word, levenshtein
+from utils import sparse_tuple_from, resize_image, label_to_array, ground_truth_to_word, levenshtein
 
 # 日志级别
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
@@ -28,7 +28,7 @@ class CRNN(object):
         with self.__session.as_default():
             (
                 self.__inputs,
-                self.__tragets,
+                self.__targets,
                 self.__seq_len,
                 self.__logits,
                 self.__decoded,
@@ -42,7 +42,7 @@ class CRNN(object):
             self.__init.run()
 
         with self.__session.as_default():
-            self.__saver = tf.train.Saver(tf.grobal_variables(), max_to_keep=10)  ## ？？？
+            self.__saver = tf.train.Saver(tf.global_variables(), max_to_keep=10)  ## ？？？
             # 载入上次的ckpt如果有需要
             if self.__restore:
                 print("Restoring")
@@ -53,7 +53,7 @@ class CRNN(object):
                     self.__saver.restore(self.__session, ckpt)
 
         #  创建 data_manager
-        self.__data_manager = DataManager(batch_size.model_path, examples_path.max_image_width, train_test_ratio,
+        self.__data_manager = DataManager(batch_size, model_path, examples_path, max_image_width, train_test_ratio,
                                           self.__max_char_count)
 
     def crnn(self, max_width, batch_size):
@@ -67,9 +67,9 @@ class CRNN(object):
 
             with tf.variable_scope(None, default_name="bidirectional-rnn-1"):
                 # 前向
-                lstm_fw_cell_1 = rnn.BasicLSTMCell(256)
+                lstm_fw_cell_1 = tf.nn.rnn_cell.LSTMCell(256)
                 # 反向
-                lstm_bw_cell_1 = rnn.BasicLSTMCell(256)
+                lstm_bw_cell_1 = tf.nn.rnn_cell.LSTMCell(256)
                 # 中间输出
                 inter_output, _ = tf.nn.bidirectional_dynamic_rnn(lstm_fw_cell_1, lstm_bw_cell_1, inputs, seq_len,
                                                                   dtype=tf.float32)
@@ -78,9 +78,9 @@ class CRNN(object):
 
             with tf.variable_scope(None, default_name="bidirectional-rnn-2"):
                 # 前向
-                lstm_fw_cell_2 = rnn.BasicLSTMCell(256)
+                lstm_fw_cell_2 = tf.nn.rnn_cell.LSTMCell(256)
                 # 反向
-                lstm_bw_cell_2 = rnn.BasicLSTMCell(256)
+                lstm_bw_cell_2 = tf.nn.rnn_cell.LSTMCell(256)
 
                 outputs, _ = tf.nn.bidirectional_dynamic_rnn(lstm_fw_cell_2, lstm_bw_cell_2, inter_output, seq_len,
                                                              dtype=tf.float32)
@@ -120,7 +120,7 @@ class CRNN(object):
                                      activation=tf.nn.relu)
 
             # 1x2 / 1
-            pool3 = tf.layers.max_pooling2d(inputs=conv4, pool_size=[2, 2], stride=[1, 2], padding="same")
+            pool3 = tf.layers.max_pooling2d(inputs=conv4, pool_size=[2, 2], strides=[1, 2], padding="same")
 
             # 512 / 3x3 / 1 / 1
             conv5 = tf.layers.conv2d(inputs=pool3, filters=512, kernel_size=(3, 3), padding="same",
@@ -152,16 +152,16 @@ class CRNN(object):
 
         cnn_output = CNN(inputs)
 
-        reshaped_cnn_out_put = tf.reshape(cnn_output, [batch_size, -1, 512])
+        reshaped_cnn_output = tf.reshape(cnn_output, [batch_size, -1, 512])
 
-        max_char_count = reshaped_cnn_out_put.get_shape().as_list()[1]
+        max_char_count = reshaped_cnn_output.get_shape().as_list()[1]
 
-        crnn_model = BidirectionalRNN(reshaped_cnn_out_put, seq_len)
+        crnn_model = BidirectionalRNN(reshaped_cnn_output, seq_len)
 
         logits = tf.reshape(crnn_model, [-1, 512])
 
         W = tf.Variable(tf.truncated_normal([512, config.NUM_CLASSES], stddev=0.1), name="W")
-        b = tf.Variable(tf.constant(0, shape=[config.NUM_CLASSES], name="b"))
+        b = tf.Variable(tf.constant(0., shape=[config.NUM_CLASSES]),name="b")
 
         logits = tf.matmul(logits, W) + b
 
@@ -199,7 +199,7 @@ class CRNN(object):
                         [self.__optimizer, self.__decoded, self.__cost],
                         feed_dict={
                             self.__inputs: batch_x,
-                            self.__seq_len: [self._max_char_count] * self.__data_manager.batch_size,
+                            self.__seq_len: [self.__max_char_count] * self.__data_manager.batch_size,
                             self.__targets: batch_dt
                         }
                     )
@@ -217,7 +217,7 @@ class CRNN(object):
                     global_step=self.step
                 )
 
-                print('[{} Iteration loss: {}]'.format(self.step, iter_loss))
+                print('[{}] Iteration loss: {}'.format(self.step, iter_loss))
 
                 self.step += 1
         return None

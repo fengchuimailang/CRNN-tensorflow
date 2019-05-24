@@ -22,7 +22,8 @@ class DataManager(object):
         self.examples_path = examples_path
         self.max_char_count = max_char_count
         self.data, self.data_len = self.__load_data()
-        self.current_test_offset = self.test_offect
+        self.test_offset = int(train_test_ratio * self.data_len)
+        self.current_test_offset = self.test_offset
         self.train_batches = self.__generate_all_train_batches()
         self.test_batches = self.__generate_all_test_batches()
 
