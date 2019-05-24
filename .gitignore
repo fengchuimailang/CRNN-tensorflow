@@ -200,4 +200,4 @@ dmypy.json
 .idea/workspace.xml
 
 # 不传save
-/save
+/save/
