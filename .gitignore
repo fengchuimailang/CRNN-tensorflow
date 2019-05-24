@@ -198,3 +198,6 @@ dmypy.json
 .idea/misc.xml
 .idea/modules.xml
 .idea/workspace.xml
+
+# 不传save
+/save
