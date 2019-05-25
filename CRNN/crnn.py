@@ -205,18 +205,20 @@ class CRNN(object):
                         }
                     )
 
+                    # 每10轮会打印一次信息，从第一轮开始
                     if i % 10 == 0:
-                        for j in range(2):
+                        # 打印第一个batch的训练结果
+                        for j in range(1):
                             print(batch_y[j])
                             print(ground_truth_to_word(decoded[j]))
 
                     iter_loss += loss_value
 
-                self.__saver.save(
-                    self.__session,
-                    self.__save_path,
-                    global_step=self.step
-                )
+                    self.__saver.save(
+                        self.__session,
+                        self.__save_path,
+                        global_step=self.step
+                    )
 
                 print('[{}] Iteration loss: {}'.format(self.step, iter_loss))
 
